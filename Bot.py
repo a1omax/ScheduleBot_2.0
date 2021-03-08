@@ -283,7 +283,7 @@ def listener(message):
                     send = check()
 
                     if send != 0:
-                        bot.send_message(chat_id, "`альфа тест`" + str(send), parse_mode= 'Markdown')
+                        bot.send_message(chat_id, "`альфа тест`\n" + str(send), parse_mode= 'Markdown')
                     break
 
 
