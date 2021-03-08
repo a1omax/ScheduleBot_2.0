@@ -6,8 +6,7 @@ from arg import *
 from dateutil.tz import tzoffset
 from groups import group
 
-schedule = sched[0][0]
-
+dots = "........................"
 def chooseSched(groupNumb):
 
     for i in group:
@@ -102,7 +101,7 @@ def para_today_by_arg(key=0):
     elif numb <= 5:
         para = number_of_para(numb)
         if para is not None:
-            return "\nПара №" + str(numb) + "\nУ первой подгруппы: " + para[0] + "\nУ второй подгруппы: " + para[1] + \
+            return "\n\t*" + dots +"Пара №" + str(numb) + dots + "*\n\n*У первой подгруппы:*\n" + para[0] + "\n\n*У второй подгруппы:*\n" + para[1] + \
                    "\nДо конца пары: " + str(left) + " минут"
         else:
             return "\nУ первой и второй подгруппы сейчас нет пар"
@@ -124,8 +123,8 @@ def para_by_key_word(day):
         another_week = day // 7
 
     def output(numb, key=0):
-        return "*"+str(numb) + " пара*" + "\nПодгруппа А:\n" + \
-               (week_now(another_week).get(key % 7)).get(numb)[0] + "\n\nПодгруппа В:\n" + \
+        return "\n\t*" + dots +str(numb) + " пара" + dots + "*\n" + "\n*Подгруппа А:*\n" + \
+               (week_now(another_week).get(key % 7)).get(numb)[0] + "\n\n*Подгруппа В:*\n" + \
                (week_now(another_week).get(key % 7)).get(numb)[1] + "\n\n"
 
     out = "\n"
@@ -152,10 +151,35 @@ def checkChatId(chat_id):
     with open("chatid.txt", "r", encoding="utf8") as f:
         for line in f:
             if str(chat_id) in line:
-                print("найдено!")
+
                 grp = line.split(":")[1]
                 grp = grp.replace("\n", "")
                 return str(grp)
+    return 0
+
+def checkReplaceOldGroup(chat_id, id_input):
+
+    for i in group:
+        for j in group[i]:
+            if str(j) == str(id_input):
+                with open("chatid.txt", "r", encoding="utf8") as f:
+                    id_list = f.readlines()
+                    amountOfLines = range(len(id_list))
+                    for i in amountOfLines:
+                        grp = id_list[i].split(":")
+                        if str(chat_id) == grp[0]:
+                            changed = [chat_id, id_input]
+                            changedIndex = i
+
+                            writeToFile = ""
+                            for l in amountOfLines:
+                                if l != changedIndex:
+                                    writeToFile += id_list[l].split(":")[0]+str(":")+id_list[l].split(":")[1]
+                                else:
+                                    writeToFile += str(changed[0])+str(":")+str(changed[1])+"\n"
+                            with open("chatid.txt","w",encoding="utf8") as f:
+                                f.write(writeToFile)
+                            return str(id_input)
     return 0
 
 
@@ -184,11 +208,6 @@ def listener(message):
         if m.content_type == 'text':
             msg_txt = m.text.lower()
 
-    grp = checkChatId(chat_id)
-
-
-
-
 
     def the_day(value):
         return (now.weekday() + value) % 7
@@ -198,32 +217,45 @@ def listener(message):
 
     split_msg = msg_txt.split()
 
-    global count
+
     for i in ['пара', 'пары', 'расписание']:
         for j in split_msg:
             if i == j:
 
-                if grp == 0:
-                    flag = False
+                grp = checkChatId(chat_id)
 
-                    for k in split_msg:
-                        if k == 'группа':
+                for k in split_msg:
+                    if k == 'группа':
+                        if grp == 0:
                             for g in split_msg:
                                 if checkAddNewGroup(chat_id, g) == 1:
                                     bot.send_message(chat_id, 'Успех')
                                     print("Успех")
-                                    flag = True
                                     break
                             else:
                                 bot.send_message(chat_id, 'Провал')
                                 print("Провал")
-                    if flag is False:
-                        bot.send_message(chat_id, 'Чата id{} нет в базе.\nУкажите вашу группу написав: \n"расписание группа [номер группы]"'.format(chat_id))
+                        else:
+                            result = 0
+                            for g in split_msg:
+                                result = checkReplaceOldGroup(chat_id, g)
+                                if result != 0:
+                                    bot.send_message(chat_id, 'Группа успешно изменена на {}'.format(result))
+                                    break
+                            if result == 0:
+                                bot.send_message(chat_id, 'Неверно указана группа или другая ошибка')
+
+
+                grp = checkChatId(chat_id)
+
+                if grp == 0:
+                    bot.send_message(chat_id, 'Чата id{} нет в базе.\nУкажите вашу группу написав: \n"расписание группа [номер группы]"'.format(chat_id))
+
                 else:
                     chooseSched(grp)
 
                     msg_txt = msg_txt.replace(i, '')
-
+                    global count
                     count = msg_txt.count('после') - msg_txt.count('поза') - msg_txt.count('перед') - msg_txt.count('до')
 
                     msg_txt = (msg_txt.strip())
