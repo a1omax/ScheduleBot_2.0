@@ -101,7 +101,7 @@ def para_today_by_arg(key=0):
     elif numb <= 5:
         para = number_of_para(numb)
         if para is not None:
-            return "\n\t*" + dots +"Пара №" + str(numb) + dots + "*\n\n*У первой подгруппы:*\n" + para[0] + "\n\n*У второй подгруппы:*\n" + para[1] + \
+            return "\n*" + "Пара №" + str(numb) + dots + "*\n\n*У первой подгруппы:*\n" + para[0] + "\n\n*У второй подгруппы:*\n" + para[1] + \
                    "\nДо конца пары: " + str(left) + " минут"
         else:
             return "\nУ первой и второй подгруппы сейчас нет пар"
@@ -123,7 +123,7 @@ def para_by_key_word(day):
         another_week = day // 7
 
     def output(numb, key=0):
-        return "\n\t*" + dots +str(numb) + " пара" + dots + "*\n" + "\n*Подгруппа А:*\n" + \
+        return "\n*" + str(numb) + " пара" + dots + "*\n" + "\n*Подгруппа А:*\n" + \
                (week_now(another_week).get(key % 7)).get(numb)[0] + "\n\n*Подгруппа В:*\n" + \
                (week_now(another_week).get(key % 7)).get(numb)[1] + "\n\n"
 
