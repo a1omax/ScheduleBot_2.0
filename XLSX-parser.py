@@ -32,7 +32,7 @@ def mergedCell(cell):
                 return ws[merged_cells[0][0]].value
 
 
-def getValues(arr):
+def getValues(arr, flag = True):
 
     valArr = []
 
@@ -40,27 +40,59 @@ def getValues(arr):
         if str(type(i)) == "<class 'openpyxl.cell.cell.Cell'>":
             val = i.value
             if val == None:
-                valArr.append("нет пары")
+                if flag:
+                    valArr.append("нет пары")
+                else:
+                    valArr.append(val)
             else:
                 valArr.append(i.value)
         elif str(type(i)) == "<class 'openpyxl.cell.cell.MergedCell'>":
-            val = mergedCell(i)
-            if val == None:
-                valArr.append("нет пар")
+
+            if flag:
+                val = mergedCell(i)
+                if val == None:
+                    valArr.append("нет пар")
+                else:
+                    valArr.append(val)
             else:
+                val = "(на доработке)"
                 valArr.append(val)
+
     return valArr
 
 
-def sched(col, start):
+def sched(col, start, flag = True):
     letter = openpyxl.utils.cell.get_column_letter(col)
     arraySchedule = []
     for i in range(35):
         arraySchedule.append(ws[letter+str(start+i*4)])
+    return getValues(arraySchedule, flag)
 
-    return getValues(arraySchedule)
+def cabinetsArray(numGrop):
+    col = numGrop * 3 + 2
+    flag = False
+    cabFirstOdd = sched(col, 6, flag)
+    cabSecondOdd = sched(col, 7, flag)
+    cabFirstEven = sched(col, 8, flag)
+    cabSecondEven = sched(col, 9, flag)
+
+    oddWeekCab = []
+    evenWeekCab = []
+    for i in range(35):
+
+        if cabFirstEven[i] == None:
+            cabFirstEven[i] = cabFirstOdd[i]
+
+        if cabSecondEven[i] == None:
+            cabSecondEven[i] = cabFirstEven[i]
+        if cabSecondOdd[i] == None:
+            cabSecondOdd[i] = cabFirstOdd[i]
 
 
+        oddWeekCab.append([cabFirstOdd[i], cabSecondOdd[i]])
+        evenWeekCab.append([cabFirstEven[i], cabSecondEven[i]])
+    bothcab = [oddWeekCab, evenWeekCab]
+    return bothcab
 
 def weekGenerateArray(numGroup):
 
@@ -69,6 +101,7 @@ def weekGenerateArray(numGroup):
     secondSubGrOdd = sched(col + 1, 6)
     firstSubGrEven = sched(col, 8)
     secondSubGrEven = sched(col + 1, 8)
+
     oddWeek = []
     evenWeek = []
     for i in range(35):
@@ -89,7 +122,8 @@ def groups(numGroup):
 
 def generateSchedule(group):
 
-    array = weekGenerateArray(group)
+    arrayPara = weekGenerateArray(group)
+    arrayCab = cabinetsArray(group)
     schedule = []
 
     for d in range(2):
@@ -97,7 +131,11 @@ def generateSchedule(group):
         for day in range(7):
             dictDay = {}
             for para in range(1,6):
-                dictDay[para] = (array[d][(para-1)+day*5])
+                dictDay[para] = \
+                    [ str(  (arrayPara[d][(para-1)+day*5])[0] )+"\nКабінет: "+str ((arrayCab[d][(para-1)+day*5])[0] ),
+                     str( (arrayPara[d][(para - 1) + day * 5])[1])  + "\nКабінет: "+ str((arrayCab[d][(para - 1) + day * 5])[1])]
+
+                print(dictDay[para])
             dictTypeOfWeek[day] = dictDay
         schedule.append(dictTypeOfWeek)
     return schedule

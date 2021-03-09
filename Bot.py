@@ -6,7 +6,6 @@ from arg import *
 from dateutil.tz import tzoffset
 from groups import group
 
-dots = "........................"
 def chooseSched(groupNumb):
 
     for i in group:
@@ -90,28 +89,28 @@ def para_today_by_arg(key=0):
     else:
         break_numb, left = hours_break()
         if key == 0:
-            return "Сейчас перемена после пары №" + str(break_numb) + "\nДо следующей пары осталось: " + str(left) + \
-                   " минут"
+            return "Сейчас перемена после пары №" + str(break_numb) + "\n\nДо следующей пары осталось: *" + str(left) + \
+                   "* минут"
         elif key > 0:
             numb = break_numb + key
         else:
             numb = break_numb + key + 1
     if numb <= 0:
-        return "Пары ещё не начались" + "\nДо первой пары: "+str(left) + " минут"
+        return "Пары ещё не начались" + "\nДо первой пары: *"+str(left) + "* минут"
     elif numb <= 5:
         para = number_of_para(numb)
         if para is not None:
-            return "\n*" + "Пара №" + str(numb) + dots + "*\n\n*У первой подгруппы:*\n" + para[0] + "\n\n*У второй подгруппы:*\n" + para[1] + \
-                   "\nДо конца пары: " + str(left) + " минут"
+            return "*" + "Пара №" + str(numb) + "*\n*У первой подгруппы:*\n" + para[0] + "\n*У второй подгруппы:*\n" + para[1] + \
+                   "\nДо конца пары: *" + str(left) + "* минут"
         else:
             return "\nУ первой и второй подгруппы сейчас нет пар"
     elif numb >= 6:
-        return "Пары уже закончились"
+        return "*Пары уже закончились*"
 
 
 def para_today_by_number(numb):
     para = number_of_para(numb)
-    return "\nПара №" + str(numb) + "\nУ первой подгруппы: " + para[0] + "\nУ второй подгруппы: " + para[1]
+    return "*Пара №" + str(numb) + "\nУ подгруппы А:* \n" + para[0] + "\n*У подгруппы В: *\n" + para[1]
 
 
 def para_by_key_word(day):
@@ -123,9 +122,9 @@ def para_by_key_word(day):
         another_week = day // 7
 
     def output(numb, key=0):
-        return "\n*" + str(numb) + " пара" + dots + "*\n" + "\n*Подгруппа А:*\n" + \
-               (week_now(another_week).get(key % 7)).get(numb)[0] + "\n\n*Подгруппа В:*\n" + \
-               (week_now(another_week).get(key % 7)).get(numb)[1] + "\n\n"
+        return "\n*" + str(numb) + " пара" +"*\n" + "*Подгруппа А:*\n" + \
+               (week_now(another_week).get(key % 7)).get(numb)[0] + "\n*Подгруппа В:*\n" + \
+               (week_now(another_week).get(key % 7)).get(numb)[1] + "\n"
 
     out = "\n"
     for i in range(1, 6):
@@ -223,7 +222,7 @@ def listener(message):
             if i == j:
 
                 grp = checkChatId(chat_id)
-
+                stop = False
                 for k in split_msg:
                     if k == 'группа':
                         if grp == 0:
@@ -235,22 +234,28 @@ def listener(message):
                             else:
                                 bot.send_message(chat_id, 'Провал')
                                 print("Провал")
+                            stop = True
                         else:
                             result = 0
                             for g in split_msg:
                                 result = checkReplaceOldGroup(chat_id, g)
                                 if result != 0:
                                     bot.send_message(chat_id, 'Группа успешно изменена на {}'.format(result))
+                                    stop = True
                                     break
                             if result == 0:
                                 bot.send_message(chat_id, 'Неверно указана группа или другая ошибка')
+                                stop = True
+                                break
 
+                if stop is True:
+                    break
 
                 grp = checkChatId(chat_id)
 
                 if grp == 0:
-                    bot.send_message(chat_id, 'Чата id{} нет в базе.\nУкажите вашу группу написав: \n"расписание группа [номер группы]"'.format(chat_id))
-
+                    bot.send_message(chat_id, 'Чата id{} нет в базе.\nУкажите вашу группу написав: \n"расписание группа [номер группы]"\n\n_Например: Расписание группа 209_'.format(chat_id))
+                    break
                 else:
                     chooseSched(grp)
 
@@ -281,9 +286,13 @@ def listener(message):
                             return 0
 
                     send = check()
-
+                    if str((int(now.strftime("%V"))) % 2) == 1:
+                        kindOfWeek = "чётная неделя"
+                    else:
+                        kindOfWeek = "нечётная неделя"
                     if send != 0:
-                        bot.send_message(chat_id, "`альфа тест`\n" + str(send), parse_mode= 'Markdown')
+                        bot.send_message(chat_id, "`альфа тест\n       Внимание! Кабинеты могут быть указаны НЕВЕРНО!\n`" + str(send)+\
+                                         "\n\n`сейчас "+ kindOfWeek+"`", parse_mode= 'Markdown')
                     break
 
 
