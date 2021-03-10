@@ -254,7 +254,7 @@ def listener(message):
                 grp = checkChatId(chat_id)
 
                 if grp == 0:
-                    bot.send_message(chat_id, 'Чата id{} нет в базе.\nУкажите вашу группу написав: \n"расписание группа [номер группы]"\n\n_Например: Расписание группа 209_'.format(chat_id))
+                    bot.send_message(chat_id, 'Чата id{} нет в базе.\nУкажите вашу группу написав: \n"расписание группа [номер группы]"\n\nНапример: Расписание группа 209'.format(chat_id))
                     break
                 else:
                     chooseSched(grp)
@@ -291,7 +291,7 @@ def listener(message):
                     else:
                         kindOfWeek = "нечётная неделя"
                     if send != 0:
-                        bot.send_message(chat_id, "`альфа тест\n       Внимание! Кабинеты могут быть указаны НЕВЕРНО!\n`" + str(send)+\
+                        bot.send_message(chat_id, "`альфа тест\nВнимание!!!!\nКабинеты могут быть указаны НЕВЕРНО!\n`" + str(send)+\
                                          "\n\n`сейчас "+ kindOfWeek+"`", parse_mode= 'Markdown')
                     break
 
